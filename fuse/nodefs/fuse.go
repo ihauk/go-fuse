@@ -16,6 +16,8 @@ func MountRoot(mountpoint string, root Node, opts *Options) (*fuse.Server, *File
 	if opts != nil && opts.Debug {
 		mountOpts.Debug = opts.Debug
 	}
+	mountOpts.AllowOther = true
+
 	s, err := fuse.NewServer(conn.RawFS(), mountpoint, &mountOpts)
 	if err != nil {
 		return nil, nil, err

@@ -5,7 +5,7 @@
 package zipfs
 
 import (
-	"archive/zip"
+	//"archive/zip"
 	"bytes"
 	"fmt"
 	"io"
@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/yeka/zip"
 	"github.com/hanwen/go-fuse/fuse"
 	"github.com/hanwen/go-fuse/fuse/nodefs"
 )
@@ -53,6 +54,10 @@ func NewZipTree(name string) (map[string]MemFile, error) {
 
 	out := map[string]MemFile{}
 	for _, f := range r.File {
+		if f.IsEncrypted() {
+			f.SetPassword("123456")
+		}
+
 		if strings.HasSuffix(f.Name, "/") {
 			continue
 		}
@@ -69,6 +74,8 @@ func NewArchiveFileSystem(name string) (root nodefs.Node, err error) {
 	switch {
 	case strings.HasSuffix(name, ".zip"):
 		files, err = NewZipTree(name)
+	case strings.HasSuffix(name, ".rar"):
+		files, err = NewRARTree(name)
 	case strings.HasSuffix(name, ".tar.gz"):
 		files, err = NewTarCompressedTree(name, "gz")
 	case strings.HasSuffix(name, ".tar.bz2"):
